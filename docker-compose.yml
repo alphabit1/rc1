@@ -1,0 +1,32 @@
+version: "3.8"
+services:
+  datacollector:
+    build: ./DataCollector
+    restart: always
+    networks:
+      - net
+    ports:
+      - "5001:5001"
+    environment:
+      DB_PASS: ${DB_PASS}
+      DB_USER: ${DB_USER}
+      DB_DB: ${DB_DB}
+      DB_HOST: tdb
+      DB_PORT: 5432
+    links:
+      - "tdb:database"
+  tdb:
+    image: "timescale/timescaledb:latest-pg12"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - net
+    ports:
+      - ${DB_PORT}:5432
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_DB}
+networks:
+  net:
+    name: custom_network
